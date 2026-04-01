@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>瑞文标准推理测验</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f5f0;
+  --color-background-tertiary:#eeede8;
+  --color-text-primary:#1a1a18;
+  --color-text-secondary:#5f5e5a;
+  --color-text-tertiary:#888780;
+  --color-border-tertiary:rgba(0,0,0,0.12);
+  --color-border-secondary:rgba(0,0,0,0.22);
+  --font-sans:system-ui,-apple-system,sans-serif;
+  --border-radius-md:8px;
+  --border-radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --color-background-primary:#1c1c1a;
+    --color-background-secondary:#252523;
+    --color-background-tertiary:#2c2c2a;
+    --color-text-primary:#f0efe8;
+    --color-text-secondary:#b4b2a9;
+    --color-text-tertiary:#888780;
+    --color-border-tertiary:rgba(255,255,255,0.1);
+    --color-border-secondary:rgba(255,255,255,0.2);
+  }
+}
+body{font-family:var(--font-sans);background:var(--color-background-tertiary);min-height:100vh;padding:2rem 1rem;color:var(--color-text-primary)}
+#app{max-width:720px;margin:0 auto}
+h2{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:0.5rem}
+p{font-size:14px;color:var(--color-text-secondary);line-height:1.6}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem}
+.btn{border:0.5px solid var(--color-border-secondary);background:transparent;border-radius:var(--border-radius-md);padding:8px 20px;font-size:14px;cursor:pointer;color:var(--color-text-primary);transition:background 0.15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#4A3FB5;color:#fff;border-color:#4A3FB5}
+.btn-primary:hover{background:#3C34A0}
+.progress-bar{height:4px;background:var(--color-background-secondary);border-radius:2px;margin:1rem 0}
+.progress-fill{height:4px;background:#4A3FB5;border-radius:2px;transition:width 0.3s}
+canvas{display:block}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:1rem}
+.choice-btn{border:1.5px solid var(--color-border-tertiary);background:var(--color-background-primary);border-radius:var(--border-radius-md);padding:8px;cursor:pointer;transition:border-color 0.15s;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.choice-btn:hover{border-color:#4A3FB5}
+.choice-btn.selected{border-color:#4A3FB5;background:#EEEDFE}
+.choice-btn.correct{border-color:#1D9E75;background:#E1F5EE}
+.choice-btn.wrong{border-color:#D85A30;background:#FAECE7}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:1rem 0}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;text-align:center}
+.stat-num{font-size:24px;font-weight:500;color:var(--color-text-primary)}
+.stat-label{font-size:12px;color:var(--color-text-secondary);margin-top:4px}
+.result-bar{height:20px;background:var(--color-background-secondary);border-radius:10px;overflow:hidden;margin:8px 0}
+.result-fill{height:20px;border-radius:10px;transition:width 0.6s}
+.section{margin-bottom:1.5rem}
+table{width:100%;font-size:13px;border-collapse:collapse}
+th{text-align:left;color:var(--color-text-secondary);font-weight:400;padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary)}
+td{padding:6px 8px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+tr.highlight{background:var(--color-background-secondary)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);font-weight:500}
+.timer{font-size:13px;color:var(--color-text-secondary)}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="screen-start">
+  <div style="margin-bottom:1.5rem">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem">
+      <div style="width:36px;height:36px;border-radius:50%;background:#EEEDFE;display:flex;align-items:center;justify-content:center">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><rect x="1" y="1" width="7" height="7" rx="1" fill="#7F77DD"/><rect x="10" y="1" width="7" height="7" rx="1" fill="#AFA9EC"/><rect x="1" y="10" width="7" height="7" rx="1" fill="#AFA9EC"/><rect x="10" y="10" width="7" height="7" rx="1" fill="#534AB7" opacity="0.4" stroke="#7F77DD" stroke-width="1.5" stroke-dasharray="2 1"/></svg>
+      </div>
+      <h2 style="margin:0">瑞文标准推理测验</h2>
+    </div>
+    <p>本测验共 <strong>12 道题</strong>，每题展示一个图案矩阵，请从6个选项中选出缺失的那一块。</p>
+    <p style="margin-top:8px">测验时间约 <strong>8–10 分钟</strong>，请独立作答，不要使用辅助工具。</p>
+  </div>
+  <div class="card" style="margin-bottom:1rem">
+    <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px">注意事项</p>
+    <ul style="font-size:13px;color:var(--color-text-secondary);padding-left:1rem;line-height:2">
+      <li>观察矩阵中行与列的规律</li>
+      <li>每道题只有一个正确答案</li>
+      <li>答题后可看到每题解析</li>
+      <li>完成后将生成个人评估报告</li>
+    </ul>
+  </div>
+  <button class="btn btn-primary" onclick="startTest()" style="width:100%;padding:12px">开始测验</button>
+</div>
+
+<div id="screen-test" style="display:none">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+    <span style="font-size:14px;color:var(--color-text-secondary)">第 <span id="q-num">1</span> / 12 题</span>
+    <span class="timer" id="timer-display">00:00</span>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="prog" style="width:8%"></div></div>
+  <div class="card" style="margin-bottom:1rem">
+    <canvas id="matrix-canvas" width="320" height="320" style="width:100%;max-width:320px;margin:0 auto;display:block"></canvas>
+    <div id="q-explanation" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md)">
+      <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px">解析</p>
+      <p id="explanation-text" style="font-size:13px;color:var(--color-text-secondary)"></p>
+    </div>
+  </div>
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:0.5rem">选出缺失的图案：</p>
+  <div class="choices" id="choices-area"></div>
+  <div style="margin-top:1rem;text-align:right">
+    <button class="btn btn-primary" id="next-btn" onclick="nextQuestion()" style="display:none">下一题</button>
+  </div>
+</div>
+
+<div id="screen-result" style="display:none">
+  <h2 style="margin-bottom:0.25rem">测验完成</h2>
+  <p style="margin-bottom:1.25rem">以下是您的个人评估报告</p>
+  <div class="stat-grid">
+    <div class="stat"><div class="stat-num" id="r-score">0</div><div class="stat-label">总分</div></div>
+    <div class="stat"><div class="stat-num" id="r-pct">0%</div><div class="stat-label">正确率</div></div>
+    <div class="stat"><div class="stat-num" id="r-time">0'</div><div class="stat-label">用时</div></div>
+  </div>
+  <div class="card section">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.75rem">
+      <div id="level-icon" style="width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px"></div>
+      <div>
+        <div style="font-size:15px;font-weight:500;color:var(--color-text-primary)" id="level-name"></div>
+        <div style="font-size:12px;color:var(--color-text-secondary)" id="level-iq"></div>
+      </div>
+    </div>
+    <p style="font-size:13px;color:var(--color-text-secondary)" id="level-desc"></p>
+  </div>
+  <div class="card section">
+    <p style="font-size:14px;font-weight:500;margin-bottom:0.75rem">各能力维度分析</p>
+    <div id="dimension-bars"></div>
+  </div>
+  <div class="card section">
+    <p style="font-size:14px;font-weight:500;margin-bottom:0.75rem">题目回顾</p>
+    <table>
+      <tr><th>题号</th><th>题型</th><th>你的答案</th><th>结果</th><th>用时</th></tr>
+      <tbody id="review-table"></tbody>
+    </table>
+  </div>
+  <div class="card section">
+    <p style="font-size:14px;font-weight:500;margin-bottom:0.75rem">学习建议</p>
+    <div id="suggestions" style="font-size:13px;color:var(--color-text-secondary);line-height:2"></div>
+  </div>
+  <div style="display:flex;gap:10px;margin-top:1rem">
+    <button class="btn btn-primary" onclick="restartTest()" style="flex:1">重新测验</button>
+  </div>
+</div>
+</div>
+
+<script>
+const SHAPES={
+  circle:(c,x,y,s,col)=>{c.beginPath();c.arc(x,y,s/2.2,0,Math.PI*2);c.fillStyle=col;c.fill()},
+  square:(c,x,y,s,col)=>{c.fillStyle=col;c.fillRect(x-s/2.2,y-s/2.2,s/1.1,s/1.1)},
+  triangle:(c,x,y,s,col)=>{c.beginPath();c.moveTo(x,y-s/2.2);c.lineTo(x+s/2.2,y+s/2.2);c.lineTo(x-s/2.2,y+s/2.2);c.closePath();c.fillStyle=col;c.fill()},
+  diamond:(c,x,y,s,col)=>{c.beginPath();c.moveTo(x,y-s/2);c.lineTo(x+s/2.2,y);c.lineTo(x,y+s/2);c.lineTo(x-s/2.2,y);c.closePath();c.fillStyle=col;c.fill()},
+  cross:(c,x,y,s,col)=>{c.fillStyle=col;let t=s/6;c.fillRect(x-t,y-s/2.2,t*2,s/1.1);c.fillRect(x-s/2.2,y-t,s/1.1,t*2)},
+  hexagon:(c,x,y,s,col)=>{c.beginPath();for(let i=0;i<6;i++){let a=Math.PI/180*(60*i-30);c.lineTo(x+s/2.2*Math.cos(a),y+s/2.2*Math.sin(a))}c.closePath();c.fillStyle=col;c.fill()},
+  star:(c,x,y,s,col)=>{c.beginPath();for(let i=0;i<10;i++){let r=i%2===0?s/2.2:s/5,a=Math.PI/5*i-Math.PI/2;c.lineTo(x+r*Math.cos(a),y+r*Math.sin(a))}c.closePath();c.fillStyle=col;c.fill()},
+  ring:(c,x,y,s,col)=>{c.beginPath();c.arc(x,y,s/2.2,0,Math.PI*2);c.strokeStyle=col;c.lineWidth=s/8;c.stroke()},
+};
+
+const COLS_LIGHT=['#534AB7','#1D9E75','#D85A30','#4A3FB5','#0C447C','#BA7517'];
+const COLS_DARK=['#AFA9EC','#5DCAA5','#F0997B','#7F77DD','#378ADD','#EF9F27'];
+function getColors(){
+  return window.matchMedia('(prefers-color-scheme:dark)').matches?COLS_DARK:COLS_LIGHT;
+}
+
+const QUESTIONS=[
+  {type:'颜色规律',skill:'感知辨别',explanation:'每行颜色相同，每列图形相同。右下角应是深色圆形。',difficulty:1,
+    generate:(ctx,cell)=>{const sh=['circle','square','triangle'];const colors=getColors();const rowColors=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;const x=cell/2+c*cell,y=cell/2+r*cell;SHAPES[sh[c]](ctx,x,y,cell*0.65,rowColors[r]);}},
+    answerIndex:0,
+    choices:(cell)=>{const colors=getColors();return[(ctx)=>{SHAPES['triangle'](ctx,cell/2,cell/2,cell*0.65,colors[2])},(ctx)=>{SHAPES['triangle'](ctx,cell/2,cell/2,cell*0.65,colors[0])},(ctx)=>{SHAPES['circle'](ctx,cell/2,cell/2,cell*0.65,colors[2])},(ctx)=>{SHAPES['square'](ctx,cell/2,cell/2,cell*0.65,colors[2])},(ctx)=>{SHAPES['triangle'](ctx,cell/2,cell/2,cell*0.65,colors[1])},(ctx)=>{SHAPES['diamond'](ctx,cell/2,cell/2,cell*0.65,colors[2])}];}
+  },
+  {type:'数量规律',skill:'数量推理',explanation:'每行中图形数量依次为1、2、3。第三行已有1个和2个，第三格应有3个图形。',difficulty:2,
+    generate:(ctx,cell)=>{const colors=getColors();const draw=(ctx,count,r,c,clr)=>{const bx=c*cell,by=r*cell;const positions=[[0.5,0.5],[0.3,0.35],[0.7,0.65],[0.3,0.65],[0.7,0.35],[0.5,0.35],[0.5,0.65]];for(let i=0;i<count;i++){const px=bx+positions[i][0]*cell,py=by+positions[i][1]*cell;SHAPES['circle'](ctx,px,py,cell*0.22,clr);}};const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;draw(ctx,c+1,r,c,cs[r]);}},
+    answerIndex:1,
+    choices:(cell)=>{const colors=getColors();const drawN=(ctx,n,clr)=>{const positions=[[0.5,0.5],[0.3,0.35],[0.7,0.65],[0.3,0.65],[0.7,0.35]];for(let i=0;i<n;i++){const px=positions[i][0]*cell,py=positions[i][1]*cell;SHAPES['circle'](ctx,px,py,cell*0.22,clr);}};return[(ctx)=>{drawN(ctx,2,colors[2])},(ctx)=>{drawN(ctx,3,colors[2])},(ctx)=>{drawN(ctx,1,colors[2])},(ctx)=>{drawN(ctx,4,colors[2])},(ctx)=>{drawN(ctx,3,colors[0])},(ctx)=>{drawN(ctx,2,colors[1])}];}
+  },
+  {type:'旋转规律',skill:'空间推理',explanation:'每行箭头方向按顺时针旋转90°。第三行第三格应为向左箭头。',difficulty:2,
+    generate:(ctx,cell)=>{const colors=getColors();const drawArrow=(ctx,x,y,angle,clr)=>{ctx.save();ctx.translate(x,y);ctx.rotate(angle);ctx.fillStyle=clr;ctx.beginPath();ctx.moveTo(0,-cell*0.3);ctx.lineTo(cell*0.22,0);ctx.lineTo(cell*0.1,0);ctx.lineTo(cell*0.1,cell*0.3);ctx.lineTo(-cell*0.1,cell*0.3);ctx.lineTo(-cell*0.1,0);ctx.lineTo(-cell*0.22,0);ctx.closePath();ctx.fill();ctx.restore();};const angles=[[0,Math.PI/2,Math.PI],[Math.PI/2,Math.PI,-Math.PI/2],[Math.PI,-Math.PI/2,0]];const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;drawArrow(ctx,cell/2+c*cell,cell/2+r*cell,angles[r][c],cs[r]);}},
+    answerIndex:3,
+    choices:(cell)=>{const colors=getColors();const drawA=(ctx,angle,clr)=>{ctx.save();ctx.translate(cell/2,cell/2);ctx.rotate(angle);ctx.fillStyle=clr;ctx.beginPath();ctx.moveTo(0,-cell*0.3);ctx.lineTo(cell*0.22,0);ctx.lineTo(cell*0.1,0);ctx.lineTo(cell*0.1,cell*0.3);ctx.lineTo(-cell*0.1,cell*0.3);ctx.lineTo(-cell*0.1,0);ctx.lineTo(-cell*0.22,0);ctx.closePath();ctx.fill();ctx.restore();};return[(ctx)=>{drawA(ctx,0,colors[2])},(ctx)=>{drawA(ctx,Math.PI/2,colors[2])},(ctx)=>{drawA(ctx,Math.PI,colors[0])},(ctx)=>{drawA(ctx,-Math.PI/2,colors[2])},(ctx)=>{drawA(ctx,Math.PI,colors[1])},(ctx)=>{drawA(ctx,-Math.PI/2,colors[0])}];}
+  },
+  {type:'大小渐变',skill:'感知辨别',explanation:'每列图形从上到下依次变大。第三列第三行应为最大的菱形。',difficulty:2,
+    generate:(ctx,cell)=>{const colors=getColors();const sizes=[[0.25,0.35,0.55],[0.3,0.4,0.6],[0.28,0.42,0.62]];const cs=[colors[0],colors[3],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;SHAPES['diamond'](ctx,cell/2+c*cell,cell/2+r*cell,cell*sizes[r][c],cs[c]);}},
+    answerIndex:2,
+    choices:(cell)=>{const colors=getColors();return[(ctx)=>{SHAPES['diamond'](ctx,cell/2,cell/2,cell*0.42,colors[2])},(ctx)=>{SHAPES['diamond'](ctx,cell/2,cell/2,cell*0.25,colors[2])},(ctx)=>{SHAPES['diamond'](ctx,cell/2,cell/2,cell*0.62,colors[2])},(ctx)=>{SHAPES['circle'](ctx,cell/2,cell/2,cell*0.62,colors[2])},(ctx)=>{SHAPES['diamond'](ctx,cell/2,cell/2,cell*0.62,colors[0])},(ctx)=>{SHAPES['square'](ctx,cell/2,cell/2,cell*0.62,colors[2])}];}
+  },
+  {type:'加减规律',skill:'逻辑推理',explanation:'每行从左到右，图形数量相加等于右侧数量。第三行：2+1=3，应有3个星形。',difficulty:3,
+    generate:(ctx,cell)=>{const colors=getColors();const counts=[[1,2,3],[2,1,3],[2,1,0]];const drawStars=(ctx,n,rx,ry,clr)=>{const pos=[[.5,.5],[.3,.3],[.7,.3],[.5,.7],[.3,.6],[.7,.6],[.5,.3]];for(let i=0;i<n;i++){SHAPES['star'](ctx,rx+pos[i][0]*cell,ry+pos[i][1]*cell,cell*0.22,clr);}};const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;drawStars(ctx,counts[r][c],c*cell,r*cell,cs[r]);}},
+    answerIndex:4,
+    choices:(cell)=>{const colors=getColors();const draw=(ctx,n,clr)=>{const pos=[[.5,.5],[.3,.3],[.7,.3],[.5,.7],[.3,.6],[.7,.6]];for(let i=0;i<n;i++){SHAPES['star'](ctx,pos[i][0]*cell,pos[i][1]*cell,cell*0.22,clr);}};return[(ctx)=>{draw(ctx,1,colors[2])},(ctx)=>{draw(ctx,2,colors[2])},(ctx)=>{draw(ctx,4,colors[2])},(ctx)=>{draw(ctx,3,colors[0])},(ctx)=>{draw(ctx,3,colors[2])},(ctx)=>{draw(ctx,2,colors[0])}];}
+  },
+  {type:'对称规律',skill:'空间推理',explanation:'每行图案沿纵轴对称变化，第三行第三格应为左右翻转的L形。',difficulty:3,
+    generate:(ctx,cell)=>{const colors=getColors();const drawL=(ctx,x,y,flip,clr)=>{ctx.fillStyle=clr;const s=cell*0.35,t=cell*0.15;if(!flip){ctx.fillRect(x-s,y-s,t*1.5,s*2);ctx.fillRect(x-s,y+s-t*1.5,s*2,t*1.5)}else{ctx.fillRect(x+s-t*1.5,y-s,t*1.5,s*2);ctx.fillRect(x-s,y+s-t*1.5,s*2,t*1.5)}};const cs=[colors[0],colors[1],colors[2]];const flips=[[0,1,0],[1,0,1],[0,1,0]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;drawL(ctx,cell/2+c*cell,cell/2+r*cell,flips[r][c],cs[r]);}},
+    answerIndex:1,
+    choices:(cell)=>{const colors=getColors();const drawL=(ctx,flip,clr)=>{ctx.fillStyle=clr;const x=cell/2,y=cell/2,s=cell*0.35,t=cell*0.15;if(!flip){ctx.fillRect(x-s,y-s,t*1.5,s*2);ctx.fillRect(x-s,y+s-t*1.5,s*2,t*1.5)}else{ctx.fillRect(x+s-t*1.5,y-s,t*1.5,s*2);ctx.fillRect(x-s,y+s-t*1.5,s*2,t*1.5)}};return[(ctx)=>{drawL(ctx,0,colors[2])},(ctx)=>{drawL(ctx,1,colors[2])},(ctx)=>{drawL(ctx,0,colors[0])},(ctx)=>{drawL(ctx,1,colors[1])},(ctx)=>{SHAPES['square'](ctx,cell/2,cell/2,cell*0.5,colors[2])},(ctx)=>{drawL(ctx,0,colors[1])}];}
+  },
+  {type:'嵌套规律',skill:'抽象推理',explanation:'每行图形在同形状内嵌套，层数从1到3递增。第三格应为三层圆形嵌套。',difficulty:4,
+    generate:(ctx,cell)=>{const colors=getColors();const drawNested=(ctx,n,x,y,clr)=>{for(let i=n;i>=1;i--){const r=cell*0.16*i;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);if(i%2===1){ctx.fillStyle=clr;ctx.fill()}else{ctx.fillStyle='var(--color-background-primary)';ctx.fill()}}};const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;drawNested(ctx,c+1,cell/2+c*cell,cell/2+r*cell,cs[r]);}},
+    answerIndex:5,
+    choices:(cell)=>{const colors=getColors();const draw=(ctx,n,clr)=>{for(let i=n;i>=1;i--){const r=cell*0.16*i;ctx.beginPath();ctx.arc(cell/2,cell/2,r,0,Math.PI*2);if(i%2===1){ctx.fillStyle=clr;ctx.fill()}else{ctx.fillStyle='#fff';ctx.fill()}}};return[(ctx)=>{draw(ctx,2,colors[2])},(ctx)=>{draw(ctx,3,colors[0])},(ctx)=>{draw(ctx,1,colors[2])},(ctx)=>{SHAPES['circle'](ctx,cell/2,cell/2,cell*0.4,colors[2])},(ctx)=>{draw(ctx,3,colors[1])},(ctx)=>{draw(ctx,3,colors[2])}];}
+  },
+  {type:'布局规律',skill:'空间推理',explanation:'九宫格中每种图形出现且仅出现3次，每行每列各出现一次。缺失位置应为六边形。',difficulty:3,
+    generate:(ctx,cell)=>{const colors=getColors();const layout=[['circle','hexagon','cross'],['cross','circle','hexagon'],['hexagon','cross','circle']];const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;SHAPES[layout[r][c]](ctx,cell/2+c*cell,cell/2+r*cell,cell*0.58,cs[r]);}},
+    answerIndex:3,
+    choices:(cell)=>{const colors=getColors();return[(ctx)=>{SHAPES['circle'](ctx,cell/2,cell/2,cell*0.58,colors[2])},(ctx)=>{SHAPES['cross'](ctx,cell/2,cell/2,cell*0.58,colors[2])},(ctx)=>{SHAPES['hexagon'](ctx,cell/2,cell/2,cell*0.58,colors[0])},(ctx)=>{SHAPES['hexagon'](ctx,cell/2,cell/2,cell*0.58,colors[2])},(ctx)=>{SHAPES['star'](ctx,cell/2,cell/2,cell*0.58,colors[2])},(ctx)=>{SHAPES['diamond'](ctx,cell/2,cell/2,cell*0.58,colors[2])}];}
+  },
+  {type:'渐变填充',skill:'感知辨别',explanation:'每行图形的填充程度从左到右递增（空心→半填→实填）。右下角应为实心正方形。',difficulty:3,
+    generate:(ctx,cell)=>{const colors=getColors();const draws=[(ctx,x,y,clr)=>{ctx.beginPath();ctx.rect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6);ctx.strokeStyle=clr;ctx.lineWidth=2;ctx.stroke()},(ctx,x,y,clr)=>{ctx.beginPath();ctx.rect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6);ctx.strokeStyle=clr;ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=clr;ctx.fillRect(x-cell*0.3,y,cell*0.6,cell*0.3)},(ctx,x,y,clr)=>{ctx.fillStyle=clr;ctx.fillRect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6)}];const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;draws[c](ctx,cell/2+c*cell,cell/2+r*cell,cs[r]);}},
+    answerIndex:0,
+    choices:(cell)=>{const colors=getColors();const x=cell/2,y=cell/2;return[(ctx)=>{ctx.fillStyle=colors[2];ctx.fillRect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6)},(ctx)=>{ctx.beginPath();ctx.rect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6);ctx.strokeStyle=colors[2];ctx.lineWidth=2;ctx.stroke()},(ctx)=>{ctx.fillStyle=colors[0];ctx.fillRect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6)},(ctx)=>{ctx.fillStyle=colors[2];ctx.fillRect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6);ctx.fillStyle='#fff';ctx.fillRect(x-cell*0.2,y-cell*0.2,cell*0.4,cell*0.4)},(ctx)=>{ctx.beginPath();ctx.rect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6);ctx.strokeStyle=colors[0];ctx.lineWidth=2;ctx.stroke()},(ctx)=>{ctx.fillStyle=colors[1];ctx.fillRect(x-cell*0.3,y-cell*0.3,cell*0.6,cell*0.6)}];}
+  },
+  {type:'双规律',skill:'逻辑推理',explanation:'形状按行变化（圆→方→三角），颜色按列变化。右下角应为三角形且用第三列颜色。',difficulty:4,
+    generate:(ctx,cell)=>{const colors=getColors();const shapes=[['circle','circle','circle'],['square','square','square'],['triangle','triangle','triangle']];const cs=[colors[0],colors[4],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;SHAPES[shapes[r][c]](ctx,cell/2+c*cell,cell/2+r*cell,cell*0.56,cs[c]);}},
+    answerIndex:2,
+    choices:(cell)=>{const colors=getColors();return[(ctx)=>{SHAPES['triangle'](ctx,cell/2,cell/2,cell*0.56,colors[0])},(ctx)=>{SHAPES['square'](ctx,cell/2,cell/2,cell*0.56,colors[2])},(ctx)=>{SHAPES['triangle'](ctx,cell/2,cell/2,cell*0.56,colors[2])},(ctx)=>{SHAPES['circle'](ctx,cell/2,cell/2,cell*0.56,colors[2])},(ctx)=>{SHAPES['triangle'](ctx,cell/2,cell/2,cell*0.56,colors[4])},(ctx)=>{SHAPES['diamond'](ctx,cell/2,cell/2,cell*0.56,colors[2])}];}
+  },
+  {type:'分割规律',skill:'抽象推理',explanation:'每个方格被分成4个象限，图案的阴影区域按顺时针旋转。最后格应阴影在右下角。',difficulty:4,
+    generate:(ctx,cell)=>{const colors=getColors();const quads=[[0,1,2],[1,2,3],[2,3,0]];const drawQ=(ctx,x,y,q,clr)=>{const h=cell*0.45;ctx.strokeStyle=clr;ctx.lineWidth=1;ctx.beginPath();ctx.rect(x-h,y-h,h*2,h*2);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-h);ctx.lineTo(x,y+h);ctx.moveTo(x-h,y);ctx.lineTo(x+h,y);ctx.stroke();ctx.fillStyle=clr;if(q===0){ctx.fillRect(x-h,y-h,h,h)}else if(q===1){ctx.fillRect(x,y-h,h,h)}else if(q===2){ctx.fillRect(x,y,h,h)}else{ctx.fillRect(x-h,y,h,h)}};const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;drawQ(ctx,cell/2+c*cell,cell/2+r*cell,quads[r][c],cs[r]);}},
+    answerIndex:4,
+    choices:(cell)=>{const colors=getColors();const drawQ=(ctx,q,clr)=>{const x=cell/2,y=cell/2,h=cell*0.45;ctx.strokeStyle=clr;ctx.lineWidth=1;ctx.beginPath();ctx.rect(x-h,y-h,h*2,h*2);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y-h);ctx.lineTo(x,y+h);ctx.moveTo(x-h,y);ctx.lineTo(x+h,y);ctx.stroke();ctx.fillStyle=clr;if(q===0){ctx.fillRect(x-h,y-h,h,h)}else if(q===1){ctx.fillRect(x,y-h,h,h)}else if(q===2){ctx.fillRect(x,y,h,h)}else{ctx.fillRect(x-h,y,h,h)}};return[(ctx)=>{drawQ(ctx,0,colors[2])},(ctx)=>{drawQ(ctx,1,colors[2])},(ctx)=>{drawQ(ctx,2,colors[0])},(ctx)=>{drawQ(ctx,1,colors[0])},(ctx)=>{drawQ(ctx,2,colors[2])},(ctx)=>{drawQ(ctx,3,colors[2])}];}
+  },
+  {type:'综合规律',skill:'抽象推理',explanation:'图案同时遵循形状轮换（行）和颜色轮换（列）两个规律，综合判断得出答案。',difficulty:5,
+    generate:(ctx,cell)=>{const colors=getColors();const sh=[['ring','cross','hexagon'],['cross','hexagon','ring'],['hexagon','ring','cross']];const cs=[colors[0],colors[1],colors[2]];for(let r=0;r<3;r++)for(let c=0;c<3;c++){if(r===2&&c===2)continue;SHAPES[sh[r][c]](ctx,cell/2+c*cell,cell/2+r*cell,cell*0.58,cs[(r+c)%3]);}},
+    answerIndex:3,
+    choices:(cell)=>{const colors=getColors();return[(ctx)=>{SHAPES['cross'](ctx,cell/2,cell/2,cell*0.58,colors[0])},(ctx)=>{SHAPES['hexagon'](ctx,cell/2,cell/2,cell*0.58,colors[0])},(ctx)=>{SHAPES['cross'](ctx,cell/2,cell/2,cell*0.58,colors[2])},(ctx)=>{SHAPES['cross'](ctx,cell/2,cell/2,cell*0.58,colors[1])},(ctx)=>{SHAPES['ring'](ctx,cell/2,cell/2,cell*0.58,colors[1])},(ctx)=>{SHAPES['hexagon'](ctx,cell/2,cell/2,cell*0.58,colors[2])}];}
+  },
+];
+
+let current=0,answers=[],times=[],startTime=0,qStart=0,timerInterval=null,totalStart=0;
+
+function startTest(){
+  document.getElementById('screen-start').style.display='none';
+  document.getElementById('screen-test').style.display='block';
+  totalStart=Date.now();
+  loadQuestion(0);
+  timerInterval=setInterval(updateTimer,1000);
+}
+
+function updateTimer(){
+  const elapsed=Math.floor((Date.now()-totalStart)/1000);
+  const m=Math.floor(elapsed/60).toString().padStart(2,'0');
+  const s=(elapsed%60).toString().padStart(2,'0');
+  document.getElementById('timer-display').textContent=m+':'+s;
+}
+
+function loadQuestion(idx){
+  current=idx;
+  qStart=Date.now();
+  document.getElementById('q-num').textContent=idx+1;
+  document.getElementById('prog').style.width=((idx+1)/12*100)+'%';
+  document.getElementById('q-explanation').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+  const q=QUESTIONS[idx];
+  const canvas=document.getElementById('matrix-canvas');
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=320*dpr;canvas.height=320*dpr;
+  canvas.style.width='100%';canvas.style.maxWidth='320px';
+  ctx.scale(dpr,dpr);
+  const sz=320,cell=sz/3;
+  ctx.clearRect(0,0,sz,sz);
+  ctx.strokeStyle='rgba(0,0,0,0.15)';ctx.lineWidth=1;
+  for(let i=0;i<=3;i++){
+    ctx.beginPath();ctx.moveTo(i*cell,0);ctx.lineTo(i*cell,sz);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,i*cell);ctx.lineTo(sz,i*cell);ctx.stroke();
+  }
+  ctx.fillStyle='rgba(0,0,0,0.06)';
+  ctx.fillRect(sz-cell+2,sz-cell+2,cell-4,cell-4);
+  ctx.fillStyle='rgba(0,0,0,0.3)';
+  ctx.font='bold '+(cell*0.5)+'px system-ui';
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('?',sz-cell/2,sz-cell/2);
+  q.generate(ctx,cell);
+  const area=document.getElementById('choices-area');
+  area.innerHTML='';
+  const chs=q.choices(80);
+  chs.forEach((drawFn,i)=>{
+    const btn=document.createElement('button');
+    btn.className='choice-btn';
+    btn.setAttribute('data-index',i);
+    const cv=document.createElement('canvas');
+    cv.width=80;cv.height=80;cv.style.width='100%';
+    const cc=cv.getContext('2d');
+    drawFn(cc);
+    btn.appendChild(cv);
+    const label=document.createElement('div');
+    label.style.cssText='font-size:11px;color:#888;margin-top:2px';
+    label.textContent=String.fromCharCode(65+i);
+    btn.appendChild(label);
+    btn.onclick=()=>selectAnswer(i);
+    area.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx){
+  const q=QUESTIONS[current];
+  const elapsed=Math.round((Date.now()-qStart)/1000);
+  times[current]=elapsed;
+  answers[current]=idx;
+  const btns=document.querySelectorAll('.choice-btn');
+  btns.forEach((btn,i)=>{
+    btn.onclick=null;
+    if(i===q.answerIndex)btn.classList.add('correct');
+    else if(i===idx&&idx!==q.answerIndex)btn.classList.add('wrong');
+  });
+  document.getElementById('q-explanation').style.display='block';
+  document.getElementById('explanation-text').textContent=q.explanation;
+  document.getElementById('next-btn').style.display='inline-block';
+  document.getElementById('next-btn').textContent=current<11?'下一题':'查看报告';
+}
+
+function nextQuestion(){
+  if(current<11)loadQuestion(current+1);
+  else showResult();
+}
+
+function showResult(){
+  clearInterval(timerInterval);
+  document.getElementById('screen-test').style.display='none';
+  document.getElementById('screen-result').style.display='block';
+  const score=answers.filter((a,i)=>a===QUESTIONS[i].answerIndex).length;
+  const pct=Math.round(score/12*100);
+  const totalSec=Math.round((Date.now()-totalStart)/1000);
+  const tm=Math.floor(totalSec/60)+"'"+(totalSec%60).toString().padStart(2,'0')+'"';
+  document.getElementById('r-score').textContent=score+'/12';
+  document.getElementById('r-pct').textContent=pct+'%';
+  document.getElementById('r-time').textContent=tm;
+  const levels=[
+    {min:11,name:'卓越水平',iq:'IQ 参考区间：130+',desc:'您的推理能力处于顶尖水平，属于总人口中的前2%。在复杂问题的模式识别、规律归纳和抽象思维方面均表现出色，适合从事需要高度逻辑推理的工作。',icon:'◆',bg:'#EEEDFE',clr:'#534AB7'},
+    {min:9,name:'优秀水平',iq:'IQ 参考区间：115–129',desc:'您的推理能力明显高于平均水平，能够快速识别复杂规律并进行抽象推理，具备较强的学习新知识和解决难题的能力。',icon:'★',bg:'#E1F5EE',clr:'#1D9E75'},
+    {min:7,name:'良好水平',iq:'IQ 参考区间：100–114',desc:'您的推理能力处于平均偏上水平，具有良好的逻辑思维基础，在大多数学习和工作场景中表现稳定，仍有一定的提升空间。',icon:'●',bg:'#E6F1FB',clr:'#185FA5'},
+    {min:5,name:'平均水平',iq:'IQ 参考区间：85–99',desc:'您的推理能力处于人群平均范围内。通过针对性训练可以有效提升空间推理和抽象思维能力，建议多做图形逻辑类练习题。',icon:'◑',bg:'#FAEEDA',clr:'#BA7517'},
+    {min:0,name:'有待提高',iq:'IQ 参考区间：<85',desc:'本次测验得分偏低，可能需要加强图形推理相关训练。建议从基础的规律识别练习开始，循序渐进地提升空间思维和逻辑推理能力。',icon:'○',bg:'#FAECE7',clr:'#993C1D'},
+  ];
+  const lv=levels.find(l=>score>=l.min);
+  const li=document.getElementById('level-icon');
+  li.textContent=lv.icon;
+  li.style.cssText=`width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;background:${lv.bg};color:${lv.clr}`;
+  document.getElementById('level-name').textContent=lv.name;
+  document.getElementById('level-iq').textContent=lv.iq;
+  document.getElementById('level-desc').textContent=lv.desc;
+  const skills=['感知辨别','空间推理','逻辑推理','抽象推理','数量推理'];
+  const skillColors=['#534AB7','#1D9E75','#D85A30','#185FA5','#BA7517'];
+  const skillQ={};
+  skills.forEach(s=>{skillQ[s]={total:0,correct:0}});
+  QUESTIONS.forEach((q,i)=>{
+    skillQ[q.skill].total++;
+    if(answers[i]===q.answerIndex)skillQ[q.skill].correct++;
+  });
+  const dimEl=document.getElementById('dimension-bars');
+  dimEl.innerHTML='';
+  skills.forEach((s,si)=>{
+    const d=skillQ[s];
+    const p=d.total>0?Math.round(d.correct/d.total*100):0;
+    dimEl.innerHTML+=`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">${s}</span><span style="font-size:13px;color:#888">${d.correct}/${d.total} &nbsp; ${p}%</span></div><div class="result-bar"><div class="result-fill" style="width:${p}%;background:${skillColors[si]}"></div></div></div>`;
+  });
+  const tbody=document.getElementById('review-table');
+  tbody.innerHTML='';
+  QUESTIONS.forEach((q,i)=>{
+    const correct=answers[i]===q.answerIndex;
+    const badge=correct?'<span class="badge" style="background:#E1F5EE;color:#0F6E56">正确</span>':'<span class="badge" style="background:#FAECE7;color:#993C1D">错误</span>';
+    const row=document.createElement('tr');
+    if(i%2===0)row.className='highlight';
+    row.innerHTML=`<td>${i+1}</td><td>${q.type}</td><td style="color:${correct?'#1D9E75':'#D85A30'}">${String.fromCharCode(65+(answers[i]??-1))||'—'}</td><td>${badge}</td><td>${times[i]||0}秒</td>`;
+    tbody.appendChild(row);
+  });
+  const weak=skills.filter(s=>{const d=skillQ[s];return d.total>0&&d.correct/d.total<0.6});
+  const sug=document.getElementById('suggestions');
+  let html='';
+  if(weak.length===0){html='<p>各项能力均表现良好！建议挑战更高难度的推理题目，如GMAT图形推理、门萨测试等，持续保持思维敏锐度。</p>'}
+  else{
+    html+='<p style="margin-bottom:8px">根据您的薄弱项，建议重点训练：</p><ul style="padding-left:1rem">';
+    const tips={'感知辨别':'多练习图形细节比较练习，提高对颜色、形状、大小差异的敏感度。','空间推理':'进行折纸、积木拼接等空间想象训练，提升图形旋转和翻转的心理表征能力。','逻辑推理':'练习数列规律和图形推理题，加强对规则的抽象提取和验证能力。','抽象推理':'从简单的类比推理开始，逐步理解图形间的关系映射和概念归纳。','数量推理':'强化数量变化规律的感知，多做数量增减、分布规律类型的训练题。'};
+    weak.forEach(w=>{html+=`<li style="margin-bottom:4px"><strong>${w}</strong>：${tips[w]}</li>`});
+    html+='</ul>';
+  }
+  sug.innerHTML=html;
+}
+
+function restartTest(){
+  answers=[];times=[];current=0;
+  document.getElementById('screen-result').style.display='none';
+  document.getElementById('screen-start').style.display='block';
+}
+</script>
+</body>
+</html>
